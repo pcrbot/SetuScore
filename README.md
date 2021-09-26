@@ -32,7 +32,7 @@
 把文件夹放入`modules`中并在`__bot__.py`中添加该插件
 
 效果图:
-![img](./img/img8.jpg)
+![img](./img/img9.jpg)
 
 ## 功能
 |指令|说明|
