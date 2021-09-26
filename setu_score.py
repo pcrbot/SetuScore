@@ -15,10 +15,14 @@ EXCEED_NOTICE = f'您今天已经打了{_max}次分了，请明早5点后再来�
 _nlmt = DailyNumberLimiter(_max)
 _flmt = FreqLimiter(60)
 SEARCH_TIMEOUT = 30
+reply = False  #是否通过回复打分,是为True,否为False
+               #如果无法回复请检查你的aiocqhttp版本是否大于等于1.4.0
+               #如果你是很早以前部署的bot那么很大概率你的aiocqhttp小于1.4.0
+               #可以使用指令 pip install --upgrade aiocqhttp 更新版本
 
-cache = ''  #你go-cqhttp.exe的文件夹 例如我的go-cqhttp.exe放在C:/go-cqhttp/这个文件夹里,那么这里就填C:/go-cqhttp/
-APP_ID = '' #你的AppID
-API_KEY = ''#你的API Key
+cache = ''     #你go-cqhttp.exe的文件夹 例如我的go-cqhttp.exe放在C:/go-cqhttp/这个文件夹里,那么这里就填C:/go-cqhttp/
+APP_ID = ''    #你的AppID
+API_KEY = ''   #你的API Key
 SECRET_KEY = ''#你的Secret Key
 
 client = AipContentCensor(APP_ID, API_KEY, SECRET_KEY)
@@ -80,10 +84,11 @@ class PicListener:
 
 pls = PicListener()
 
-@sv.on_prefix('打分')
+@sv.on_prefix(('打分','评分'))
 async def setu_score(bot,ev: CQEvent):
-    uid = ev['user_id']
-    gid = ev['group_id']
+    uid = ev.user_id
+    gid = ev.group_id
+    msg_id = ev.message_id
     if not _nlmt.check(uid):
         await bot.send(ev, EXCEED_NOTICE, at_sender=True)
         return
@@ -123,13 +128,18 @@ async def setu_score(bot,ev: CQEvent):
         err = porn['msg']
         await bot.send(ev,f'错误:{code}\n{err}')
         return
-    url = os.path.join(cache,img_file)
-    await bot.send(ev,str(MessageSegment.image(f'file:///{os.path.abspath(url)}')+f'\n色图评分:{score}'))
+    if reply is False:
+        url = os.path.join(cache,img_file)
+        await bot.send(ev,str(MessageSegment.image(f'file:///{os.path.abspath(url)}')+f'\n色图评分:{score}'))
+    else:
+        await bot.send(ev,MessageSegment.reply(msg_id) + f'色图评分:{score}')
     _flmt.start_cd(uid)
     _nlmt.increase(uid)
 
 @sv.on_message('group')
 async def picmessage(bot, ev: CQEvent):
+    uid = ev.user_id
+    msg_id = ev.message_id
     ret = re.search(r"\[CQ:at,qq=(\d*)\]", str(ev.message))
     atcheck = False
     batchcheck = False
@@ -141,7 +151,6 @@ async def picmessage(bot, ev: CQEvent):
             batchcheck = True
     if not(batchcheck or atcheck):
         return
-    uid = ev.user_id
     
     ret = re.search(r"\[CQ:image,file=(.*)?,url=(.*)\]", str(ev.message))
     if not ret:
@@ -157,8 +166,11 @@ async def picmessage(bot, ev: CQEvent):
         err = porn['msg']
         await bot.send(ev,f'错误:{code}\n{err}')
         return
-    url = os.path.join(cache,img_file)
-    await bot.send(ev,str(MessageSegment.image(f'file:///{os.path.abspath(url)}')+f'\n色图评分:{score}'))
+    if reply is False:
+        url = os.path.join(cache,img_file)
+        await bot.send(ev,str(MessageSegment.image(f'file:///{os.path.abspath(url)}')+f'\n色图评分:{score}'))
+    else:
+        await bot.send(ev,MessageSegment.reply(msg_id) + f'色图评分:{score}')
     pls.turn_off(ev.group_id)
     _flmt.start_cd(uid)
     _nlmt.increase(uid)
