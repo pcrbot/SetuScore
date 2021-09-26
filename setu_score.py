@@ -8,7 +8,7 @@ from hoshino.typing import CQEvent, MessageSegment
 
 sv = Service('色图打分')
 
-cache = ''  #你go-cqhttp的位置
+cache = ''  #你go-cqhttp.exe的文件夹 例如我的go-cqhttp.exe放在C:/go-cqhttp/这个文件夹里,那么这里就填C:/go-cqhttp/
 APP_ID = '' #你的AppID
 API_KEY = ''#你的API Key
 SECRET_KEY = ''#你的Secret Key
