@@ -1,6 +1,10 @@
 # SetuScore
 一个为色图打分的插件
 
+## 更新
+添加了对data的检测
+支持连续对话
+
 ## 使用说明
 
 在 https://cloud.baidu.com/product/imagecensoring 页面开通服务
@@ -37,7 +41,7 @@
 ## 功能
 |指令|说明|
 |-----|-----|
-|打分|让机器人为图片打分,图片与指令需要在同一消息内|
+|打分|让机器人为图片打分|
 
 ## 致谢
 连续对话代码参考(嗯缝)了 https://github.com/pcrbot/picfinder_take
