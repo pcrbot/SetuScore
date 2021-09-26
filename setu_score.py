@@ -35,16 +35,19 @@ def porn_pic_index(img):
             r = result
             if "error_code" in r:
                 return { 'code': r['error_code'], 'msg': r['error_msg'] }
-            else:
-                porn = 0
-                sexy = 0
-                for c in r['data']:
-                    #由于百度的图片审核经常给出极低分,所以不合规项置信度*500后为分数
-                    if c['type'] == 1 and c['subType'] == 0:
-                        porn = int(c['probability'] * 500)
-                    elif c['type'] == 1 and c['subType'] == 1:
-                        sexy = int(c['probability'] * 500)
-                return { 'code': 0, 'msg': 'Success', 'value': max(sexy,porn) }
+            try:
+                data = r['data']
+            except:
+                { 'code': -1, 'msg': '请检查策略组中疑似区间是否拉满' }
+            porn = 0
+            sexy = 0
+            for c in data:
+                #由于百度的图片审核经常给出极低分,所以不合规项置信度*500后为分数
+                if c['type'] == 1 and c['subType'] == 0:
+                    porn = int(c['probability'] * 500)
+                elif c['type'] == 1 and c['subType'] == 1:
+                    sexy = int(c['probability'] * 500)
+            return { 'code': 0, 'msg': 'Success', 'value': max(sexy,porn) }
 
         else:
             return { 'code': -1, 'msg': 'API Error' }
