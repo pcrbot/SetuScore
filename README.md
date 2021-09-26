@@ -26,6 +26,9 @@
 色情拉满,然后在页面最下面保存策略
 ![img](./img/img6.png)
 
+效果图:
+![img](./img/img8.jpg)
+
 
 使用`pip install baidu-aip`指令安装SDK
 
