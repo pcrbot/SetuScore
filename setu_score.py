@@ -118,6 +118,8 @@ async def setu_score(bot,ev: CQEvent):
                 await bot.send(ev, f"[CQ:at,qq={pls.on[gid]}] 由于超时，已为您自动退出打分模式，以后要记得说“退出打分”来退出打分模式噢~")
                 pls.turn_off(ev.group_id)
                 return
+        return
+    await bot.send(ev,'打分中...')
     file = ret.group(1)
     url = ret.group(2)
     #↓如果你想下载图片到本地的话去掉注释↓
@@ -157,6 +159,7 @@ async def picmessage(bot, ev: CQEvent):
     ret = re.search(r"\[CQ:image,file=(.*)?,url=(.*)\]", str(ev.message))
     if not ret:
         return
+    await bot.send(ev,'打分中...')
     file= ret.group(1)
     url = ret.group(2)
     #↓如果你想下载图片到本地的话去掉注释↓
