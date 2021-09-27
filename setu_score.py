@@ -1,48 +1,50 @@
 import os
 import re
-
+import requests
+from hoshino import aiorequests
 from asyncio import sleep
 from datetime import datetime,timedelta
-from nonebot import get_bot
-from aip import AipContentCensor
 from hoshino import R, Service
 from hoshino.typing import CQEvent, MessageSegment
 from hoshino.util import FreqLimiter, DailyNumberLimiter
 
+
 sv = Service('色图打分')
-_max = 10
+_max = 10       #一天最多打分几次
+_time = 60      #打分冷却时间
 EXCEED_NOTICE = f'您今天已经打了{_max}次分了，请明早5点后再来！'
 _nlmt = DailyNumberLimiter(_max)
-_flmt = FreqLimiter(60)
+_flmt = FreqLimiter(_time)
 SEARCH_TIMEOUT = 30
 reply = False  #是否通过回复打分,是为True,否为False
                #如果无法回复请检查你的aiocqhttp版本是否大于等于1.4.0
                #如果你是很早以前部署的bot那么很大概率你的aiocqhttp小于1.4.0
                #可以使用指令 pip install --upgrade aiocqhttp 更新版本
 
-cache = ''     #你go-cqhttp.exe的文件夹 例如我的go-cqhttp.exe放在C:/go-cqhttp/这个文件夹里,那么这里就填C:/go-cqhttp/
-APP_ID = ''    #你的AppID
 API_KEY = ''   #你的API Key
 SECRET_KEY = ''#你的Secret Key
 
-client = AipContentCensor(APP_ID, API_KEY, SECRET_KEY)
+async def porn_pic_index(url):
+    host = f'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={API_KEY}&client_secret={SECRET_KEY}'
+    response = requests.get(host)
+    access_token = response.json()["access_token"]
+    request_url = "https://aip.baidubce.com/rest/2.0/solution/v1/img_censor/v2/user_defined"
+    request_url = request_url + "?access_token=" + access_token
+    headers = {'content-type': 'application/x-www-form-urlencoded'}
 
-def get_file_content(filePath):
-    with open(filePath, 'rb') as fp:
-        return fp.read()
-
-def porn_pic_index(img):
-    img = os.path.join(cache,img)
-    result = client.imageCensorUserDefined(get_file_content(img))
+    params = {"imgUrl": url}
+    resp = await aiorequests.post(request_url, data=params, headers=headers)
+    if resp.ok:
+        data = await resp.json()
     try:
-        if (result):
-            r = result
+        if (data):
+            r = data
             if "error_code" in r:
                 return { 'code': r['error_code'], 'msg': r['error_msg'] }
             try:
                 data = r['data']
             except:
-                { 'code': -1, 'msg': '请检查策略组中疑似区间是否拉满' }
+                return { 'code': -1, 'msg': '请检查策略组中疑似区间是否拉满' }
             porn = 0
             sexy = 0
             for c in data:
@@ -117,10 +119,11 @@ async def setu_score(bot,ev: CQEvent):
                 pls.turn_off(ev.group_id)
                 return
     file = ret.group(1)
-    #百度api无法直接从腾讯url获取图片,所以要下载到本地后再上传
-    img = await get_bot().get_image(file=file)
-    img_file = img['file']
-    porn = porn_pic_index(img_file)
+    url = ret.group(2)
+    #↓如果你想下载图片到本地的话去掉注释↓
+    #下载路径是你的go-cqhttp/data/cache
+    #await get_bot().get_image(file=file)
+    porn = await porn_pic_index(url)
     if porn['code'] == 0:
         score = porn['value']
     else:
@@ -129,8 +132,7 @@ async def setu_score(bot,ev: CQEvent):
         await bot.send(ev,f'错误:{code}\n{err}')
         return
     if reply is False:
-        url = os.path.join(cache,img_file)
-        await bot.send(ev,str(MessageSegment.image(f'file:///{os.path.abspath(url)}')+f'\n色图评分:{score}'))
+        await bot.send(ev,str(MessageSegment.image(url)+f'\n色图评分:{score}'))
     else:
         await bot.send(ev,MessageSegment.reply(msg_id) + f'色图评分:{score}')
     _flmt.start_cd(uid)
@@ -156,9 +158,11 @@ async def picmessage(bot, ev: CQEvent):
     if not ret:
         return
     file= ret.group(1)
-    img = await get_bot().get_image(file=file)
-    img_file = img['file']
-    porn = porn_pic_index(img_file)
+    url = ret.group(2)
+    #↓如果你想下载图片到本地的话去掉注释↓
+    #下载路径是你的go-cqhttp/data/cache
+    #await get_bot().get_image(file=file)
+    porn = await porn_pic_index(url)
     if porn['code'] == 0:
         score = porn['value']
     else:
@@ -167,8 +171,7 @@ async def picmessage(bot, ev: CQEvent):
         await bot.send(ev,f'错误:{code}\n{err}')
         return
     if reply is False:
-        url = os.path.join(cache,img_file)
-        await bot.send(ev,str(MessageSegment.image(f'file:///{os.path.abspath(url)}')+f'\n色图评分:{score}'))
+        await bot.send(ev,str(MessageSegment.image(url)+f'\n色图评分:{score}'))
     else:
         await bot.send(ev,MessageSegment.reply(msg_id) + f'色图评分:{score}')
     pls.turn_off(ev.group_id)
