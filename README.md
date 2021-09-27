@@ -2,6 +2,11 @@
 一个为色图打分的插件
 
 ## 更新
+9.27
+调用api方式改为直接调用，不用再下载SDK，传图方式改为url 感谢[@LHXnois](https://github.com/LHXnois)\
+修改了一些小问题
+
+9.26
 添加了对data的检测\
 支持连续对话\
 新增回复打分选项
@@ -16,7 +21,7 @@
 名称和描述随便填一下就行
 ![img](./img/img2.png)
 
-记住你的AppID, Api Key, Secret Key,填入`setu_score.py`里对应的位置
+记住你的Api Key, Secret Key,填入`setu_score.py`里对应的位置
 ![img](./img/img3.png)
 
 开通图片审核服务,有免费一万次记得领一下,用完的话就往账号里存十块钱,够用很久了
@@ -31,8 +36,6 @@
 色情疑似区间拉满(这一步很重要！),然后在页面最下面保存策略
 ![img](./img/img6.png)
 
-
-使用`pip install baidu-aip`指令安装SDK
 
 把文件夹放入`modules`中并在`__bot__.py`中添加该插件
 
