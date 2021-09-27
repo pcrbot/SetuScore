@@ -45,15 +45,18 @@ async def porn_pic_index(url):
                 data = r['data']
             except:
                 return { 'code': -1, 'msg': '请检查策略组中疑似区间是否拉满' }
-            porn = 0
-            sexy = 0
+            porn_0 = 0
+            porn_1 = 0
+            porn_2 = 0
             for c in data:
                 #由于百度的图片审核经常给出极低分,所以不合规项置信度*500后为分数
                 if c['type'] == 1 and c['subType'] == 0:
-                    porn = int(c['probability'] * 500)
+                    porn_0 = int(c['probability'] * 500)
                 elif c['type'] == 1 and c['subType'] == 1:
-                    sexy = int(c['probability'] * 500)
-            return { 'code': 0, 'msg': 'Success', 'value': max(sexy,porn) }
+                    porn_1 = int(c['probability'] * 500)
+                elif c['type'] == 1 and c['subType'] == 10:
+                    porn_2 = int(c['probability'] * 500)
+            return { 'code': 0, 'msg': 'Success', 'value': max(porn_0,porn_1,porn_2) }
 
         else:
             return { 'code': -1, 'msg': 'API Error' }
