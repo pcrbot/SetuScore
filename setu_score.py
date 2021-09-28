@@ -24,13 +24,15 @@ reply = False  #是否通过回复打分,是为True,否为False
 API_KEY = ''   #你的API Key
 SECRET_KEY = ''#你的Secret Key
 
+# ======================================== #
+host = f'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={API_KEY}&client_secret={SECRET_KEY}'
+response = requests.get(host)
+access_token = response.json()["access_token"]
+request_url = "https://aip.baidubce.com/rest/2.0/solution/v1/img_censor/v2/user_defined"
+request_url = request_url + "?access_token=" + access_token
+headers = {'content-type': 'application/x-www-form-urlencoded'}
+
 async def porn_pic_index(url):
-    host = f'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={API_KEY}&client_secret={SECRET_KEY}'
-    response = requests.get(host)
-    access_token = response.json()["access_token"]
-    request_url = "https://aip.baidubce.com/rest/2.0/solution/v1/img_censor/v2/user_defined"
-    request_url = request_url + "?access_token=" + access_token
-    headers = {'content-type': 'application/x-www-form-urlencoded'}
 
     params = {"imgUrl": url}
     resp = await aiorequests.post(request_url, data=params, headers=headers)
