@@ -4,6 +4,7 @@ import requests
 from hoshino import aiorequests
 from asyncio import sleep
 from datetime import datetime,timedelta
+from nonebot import get_bot
 from hoshino import R, Service
 from hoshino.typing import CQEvent, MessageSegment
 from hoshino.util import FreqLimiter, DailyNumberLimiter
